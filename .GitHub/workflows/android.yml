@@ -1,4 +1,4 @@
-name: Build Ticketmaster Android APK
+name: Build Ticketmaster Android APK-Retry
 on:
 workflow_dispatch:
 push:
