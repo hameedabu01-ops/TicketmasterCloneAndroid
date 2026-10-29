@@ -21,8 +21,8 @@ jobs:
           java-version: '17'
 
       - name: Extract Android project
-        run: unzip -q TicketmasterCloneAndroid_Project.zip -d project_source
-
+        
+run: unzip -q TicketmasterCloneAndroid_Project_FIXED.zip -d project_source
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
