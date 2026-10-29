@@ -1,29 +1,49 @@
-name: Build Ticketmaster Android APK-Retry
+name: Build Ticketmaster APK
+
 on:
-workflow_dispatch:
-push:
-branches:
-- main
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
 jobs:
-build:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout source
-uses: actions/checkout@v4
-- name: Set up Java
-uses: actions/setup-java@v4
-with:
-distribution: temurin
-java-version: '17'
-- name: Set up Gradle
-uses: gradle/actions/setup-gradle@v4
-- name: Build debug APK
-run: |
-chmod +x gradlew
-./gradlew assembleDebug
-- name: Upload APK
-uses: actions/upload-artifact@v4
-with:
-name: ticketmaster-debug-apk
-path: app/build/outputs/apk/debug/*.apk
-if-no-files-found: error
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract project ZIP
+        run: |
+          unzip -q TicketmasterCloneAndroid_Project.zip -d project_source
+
+      - name: Find Android project
+        run: |
+          GRADLEW=$(find project_source -type f -name gradlew -print -quit)
+          if [ -z "$GRADLEW" ]; then
+            echo "ERROR: No Gradle wrapper found in the ZIP."
+            find project_source -maxdepth 3 -type f | head -100
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          chmod +x "$GRADLEW"
+
+      - name: Build APK
+        run: |
+          cd "$PROJECT_DIR"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticketmaster-debug-apk
+          path: project_source/**/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
